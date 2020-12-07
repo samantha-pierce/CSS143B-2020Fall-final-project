@@ -12,6 +12,7 @@ public class IndexerImpl implements Indexer {
     public Map<String, List<List<Integer>>> index(List<String> docs) {
         Map<String, List<List<Integer>>> indexes = new HashMap<>();
         // add your code
+        
         return indexes;
     }
 }
