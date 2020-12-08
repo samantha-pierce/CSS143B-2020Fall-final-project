@@ -11,13 +11,15 @@ import java.util.Map;
 public class IndexerImpl implements Indexer {
     public Map<String, List<List<Integer>>> index(List<String> docs) {
         Map<String, List<List<Integer>>> indexes = new HashMap<>();
-        // add your code
         List<List<Integer>> docPos;
         List<Integer> wordPos;
         String keyWord;
         Map<String, List<Integer>> oneDoc;
         // gets the document
         for (int docsIndex = 0; docsIndex < docs.size(); docsIndex++) {
+            if (docs.get(docsIndex).isEmpty()) {
+                return indexes;
+            }
             String[] getWords = docs.get(docsIndex).trim().split("\\s+");
             oneDoc = new HashMap<>();
             // gets each word in the document and builds index for current document
@@ -35,8 +37,11 @@ public class IndexerImpl implements Indexer {
                 docPos = indexes.get(key);
                 if (docPos == null) {
                     docPos = new ArrayList<>();
+                    for (int i = 0; i < docs.size(); i++) {
+                        docPos.add(new ArrayList<>());
+                    }
                 }
-                docPos.add(oneDoc.get(key));
+                docPos.set(docsIndex, oneDoc.get(key));
                 indexes.put(key, docPos);
             }
         }
