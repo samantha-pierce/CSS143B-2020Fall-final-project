@@ -15,7 +15,16 @@ DO NOT CHANGE
 public class SearcherImpl implements Searcher {
     public List<Integer> search(String keyPhrase, Map<String, List<List<Integer>>> index) {
         List<Integer> result = new ArrayList<>();
-        // add your code
+        if (!index.containsKey(keyPhrase)) {
+            return result;
+        } else {
+            List<List<Integer>> value = index.get(keyPhrase);
+            for (int i = 0; i < value.size(); i++) {
+                if (!value.get(i).isEmpty()) {
+                    result.add(i);
+                }
+            }
+        }
         return result;
     }
 }
