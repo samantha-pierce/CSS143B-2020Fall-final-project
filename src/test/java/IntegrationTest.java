@@ -119,4 +119,62 @@ public class IntegrationTest {
             this.expect = expect;
         }
     }
+
+    @Test
+    public void integrationTest() {
+        List<TestCase> searchCases = getSearchCases();
+        for (TestCase testCase : searchCases) {
+            List<Integer> actual = searcher.search(
+                    testCase.target,
+                    indexer.index(testCase.documents)
+            );
+            assertEquals(testCase.expect, actual);
+        }
+    }
+
+    private List<String> getDocuments() {
+        return new ArrayList<>(
+                Arrays.asList(
+                        "The Sun accounts for 99.86% of the mass in the solar system",
+                        "Over one million Earth’s could fit inside the Sun",
+                        "The energy created by the Sun’s core is nuclear fusion",
+                        "The Sun is almost a perfect sphere",
+                        "The Aurora Borealis and Aurora Australis are caused by the interaction of solar winds with Earth’s atmosphere"
+                )
+        );
+    }
+
+    private List<TestCase> getSearchCases() {
+        List<String> docs = getDocuments();
+
+        List<TestCase> searchCases = new ArrayList<>(Arrays.asList(
+                new TestCase(
+                        docs,
+                        "the sun",
+                        new ArrayList<>(Arrays.asList(0, 1, 3))
+                ),
+                new TestCase(
+                        docs,
+                        "solar",
+                        new ArrayList<>(Arrays.asList(0, 4))
+                ),
+                new TestCase(
+                        docs,
+                        "solar system",
+                        new ArrayList<>(Arrays.asList(0))
+                ),
+                new TestCase(
+                        docs,
+                        "interaction of solar winds",
+                        new ArrayList<>(Arrays.asList(4))
+                ),
+                new TestCase(
+                        docs,
+                        "in the solar system",
+                        new ArrayList<>(Arrays.asList(0))
+                )
+        ));
+
+        return searchCases;
+    }
 }

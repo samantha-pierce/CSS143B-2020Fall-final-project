@@ -24,7 +24,7 @@ public class IndexerImpl implements Indexer {
             oneDoc = new HashMap<>();
             // gets each word in the document and builds index for current document
             for (int wordIndex = 0; wordIndex < getWords.length; wordIndex++) {
-                keyWord = getWords[wordIndex];
+                keyWord = getWords[wordIndex].toLowerCase();
                 wordPos = oneDoc.get(keyWord);
                 if (wordPos == null) {
                     wordPos = new ArrayList<>();
