@@ -38,15 +38,15 @@ public class SearcherImpl implements Searcher {
         // combines list of doc indexes for each word in the search phrase into hashmap
         Map<String, Set<Integer>> getSearchPhrase = new HashMap<>();
         Set<Integer> oneDocList;
-        for (int eaWord = 0; eaWord < wordList.length; eaWord++) {
+        for (String s : wordList) {
             oneDocList = new HashSet<>();
-            List<List<Integer>> value = index.get(wordList[eaWord]);
+            List<List<Integer>> value = index.get(s);
             for (int docIndex = 0; docIndex < value.size(); docIndex++) {
                 if (!value.get(docIndex).isEmpty()) {
                     oneDocList.add(docIndex);
                 }
             }
-            getSearchPhrase.put(wordList[eaWord], oneDocList);
+            getSearchPhrase.put(s, oneDocList);
         }
         // gets the largest list
         List<Set<Integer>> searchPhraseValues = new ArrayList<>();
@@ -62,20 +62,17 @@ public class SearcherImpl implements Searcher {
             }
         }
         // puts common docs into one list
-        List<Integer> commonDocs = new ArrayList<>();
         for (Set<Integer> eaDoc : getSearchPhrase.values()) {
             largeDoc.retainAll(eaDoc);
         }
-        commonDocs.addAll(largeDoc);
-        return commonDocs;
+        return new ArrayList<>(largeDoc);
     }
 
     private Map<Integer, List<List<Integer>>> getWordLoc(String[] searchPhrase, List<Integer> commonDocs, Map<String, List<List<Integer>>> index) {
         Map<Integer, List<List<Integer>>> wordLoc = new HashMap<>();
         List<List<Integer>> indexValues;
         List<List<Integer>> docList;
-        for (int i = 0; i < commonDocs.size(); i++) {
-            Integer docID = commonDocs.get(i);
+        for (Integer docID : commonDocs) {
             docList = new ArrayList<>();
             for (String wordInPhrase : searchPhrase) {
                 indexValues = index.get(wordInPhrase);
@@ -90,18 +87,17 @@ public class SearcherImpl implements Searcher {
     private List<Integer> findIntersectingLists(String[] searchPhrase, Map<Integer, List<List<Integer>>> locIdx) {
         List<Integer> result = new ArrayList<>();
         Map<Integer, Integer> listInter;
-        Integer counter;
+        int counter;
         for (Integer docID : locIdx.keySet()) {
             listInter = new HashMap<>();
             List<List<Integer>> locIdxValues = locIdx.get(docID);
             counter = 0;
-            for (int i = 0; i < locIdxValues.size(); i++) {
-                List<Integer> oneList = locIdxValues.get(i);
-                for (int j = 0; j < oneList.size(); j++) {
-                    if (!listInter.containsKey(oneList.get(j))) {
+            for (List<Integer> oneList : locIdxValues) {
+                for (Integer key : oneList) {
+                    if (!listInter.containsKey(key)) {
                         counter = 0;
                     }
-                    listInter.put(oneList.get(j), ++counter);
+                    listInter.put(key, ++counter);
                 }
             }
             for (Integer num : listInter.keySet()) {
