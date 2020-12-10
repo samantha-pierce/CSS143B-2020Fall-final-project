@@ -16,52 +16,18 @@ public class SearcherImpl implements Searcher {
         for (String wordInPhrase : sepPhrase) {
             if (!index.containsKey(wordInPhrase)) {
                 return result;
-            } else if (sepPhrase.length > 1) {
-                List<Integer> commonDocs = getCommonDocs(sepPhrase, index);
-                // get the location index for each word
-                Map<Integer, List<List<Integer>>> locIdx = getWordLoc(sepPhrase, commonDocs, index);
-//                List<List<Integer>> wordLocLists = new ArrayList<>();
-//                for (int i = 0; i < commonDocs.size(); i++) {
-//                    int docIdx = commonDocs.get(i);
-//                    for (String word : sepPhrase) {
-//                        List<List<Integer>> getCommonDocList = index.get(word);
-//                        for (int docList = 0; docList < getCommonDocList.size(); docList++) {
-//                            if (docList == docIdx) {
-//                                wordLocLists.add(getCommonDocList.get(docList));
-//                            }
-//                        }
-//                    }
-//                }
-//                // compute location lists
-                for (Integer docID : locIdx.keySet()) {
-                    List<List<Integer>> values = locIdx.get(docID);
-                    for (int i = 0; i < values.size(); i++) {
-                        List<Integer> oneValueList = values.get(i);
-                        for (int j = 0; j < oneValueList.size(); j++) {
-                            oneValueList.set(j, oneValueList.get(j) - i);
-                        }
-                    }
-                }
-//                for (int listIdx = 0; listIdx < wordLocLists.size(); listIdx++) {
-//                    List<Integer> oneList = wordLocLists.get(listIdx);
-//                    for (int idx = 0; idx < oneList.size(); idx++) {
-//                        oneList.set(idx, oneList.get(idx) - listIdx);
-//                    }
-//                }
-//                // find common indexes
-                result = findIntersectingLists(sepPhrase, locIdx);
-//                List<Integer> aList = wordLocLists.get(0);
-//                for (int l = 1; l < wordLocLists.size(); l++) {
-//                    if (aList.equals(wordLocLists.get(l))) {
-//                        result.add(commonDocs.get(0));
-//                    }
-//                }
-            } else {
-                List<List<Integer>> value = index.get(wordInPhrase);
-                for (int i = 0; i < value.size(); i++) {
-                    if (!value.get(i).isEmpty()) {
-                        result.add(i);
-                    }
+            }
+        }
+        if (sepPhrase.length > 1) {
+            List<Integer> commonDocs = getCommonDocs(sepPhrase, index);
+            Map<Integer, List<List<Integer>>> locIdx = getWordLoc(sepPhrase, commonDocs, index);
+            Map<Integer, List<List<Integer>>> locIdxComputed = computeLocList(locIdx);
+            result = findIntersectingLists(sepPhrase, locIdxComputed);
+        } else {
+            List<List<Integer>> value = index.get(sepPhrase[0]);
+            for (int i = 0; i < value.size(); i++) {
+                if (!value.get(i).isEmpty()) {
+                    result.add(i);
                 }
             }
         }
@@ -126,14 +92,18 @@ public class SearcherImpl implements Searcher {
 
     private List<Integer> findIntersectingLists(String[] searchPhrase, Map<Integer, List<List<Integer>>> locIdx) {
         List<Integer> result = new ArrayList<>();
-        Map<Integer, Integer> listInter = new HashMap<>();
+        Map<Integer, Integer> listInter;
         Integer counter;
         for (Integer docID : locIdx.keySet()) {
+            listInter = new HashMap<>();
             List<List<Integer>> locIdxValues = locIdx.get(docID);
             counter = 0;
             for (int i = 0; i < locIdxValues.size(); i++) {
                 List<Integer> oneList = locIdxValues.get(i);
                 for (int j = 0; j < oneList.size(); j++) {
+                    if (!listInter.containsKey(oneList.get(j))) {
+                        counter = 0;
+                    }
                     listInter.put(oneList.get(j), ++counter);
                 }
             }
@@ -144,5 +114,26 @@ public class SearcherImpl implements Searcher {
             }
         }
         return result;
+    }
+
+    private Map<Integer, List<List<Integer>>> computeLocList (Map<Integer, List<List<Integer>>> locList) {
+        Map<Integer, List<List<Integer>>> newLocList = new HashMap<>();
+        List<Integer> newCalcList;
+        List<List<Integer>> compCalcList;
+        for (Integer docID : locList.keySet()) {
+            List<List<Integer>> values = locList.get(docID);
+            compCalcList = new ArrayList<>();
+            for (int i = 0; i < values.size(); i++) {
+                List<Integer> oneValueList = values.get(i);
+                newCalcList = new ArrayList<>();
+                for (int j = 0; j < oneValueList.size(); j++) {
+                    Integer value = oneValueList.get(j) - i;
+                    newCalcList.add(j, value);
+                }
+                compCalcList.add(newCalcList);
+            }
+            newLocList.put(docID, compCalcList);
+        }
+        return newLocList;
     }
 }
