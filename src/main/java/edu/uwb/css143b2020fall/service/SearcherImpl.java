@@ -49,6 +49,7 @@ public class SearcherImpl implements Searcher {
 //                    }
 //                }
 //                // find common indexes
+                result = findIntersectingLists(sepPhrase, locIdx);
 //                List<Integer> aList = wordLocLists.get(0);
 //                for (int l = 1; l < wordLocLists.size(); l++) {
 //                    if (aList.equals(wordLocLists.get(l))) {
@@ -107,19 +108,41 @@ public class SearcherImpl implements Searcher {
         Map<Integer, List<List<Integer>>> wordLoc = new HashMap<>();
         List<List<Integer>> indexValues;
         List<List<Integer>> commonDocValues = new ArrayList<>();
-        List<List<Integer>> docValues;
-        for (String wordInPhrase : searchPhrase) {
-            docValues = new ArrayList<>();
-            indexValues = index.get(wordInPhrase);
-            for (int i = 0; i < commonDocs.size(); i++) {
-                Integer docID = commonDocs.get(i);
-                docValues.add(indexValues.get(docID));
-                commonDocValues.addAll(docValues);
-                wordLoc.put(docID, commonDocValues);
+        List<List<Integer>> docList;
+        for (int i = 0; i < commonDocs.size(); i++) {
+            Integer docID = commonDocs.get(i);
+            docList = new ArrayList<>();
+            for (String wordInPhrase : searchPhrase) {
+                //commonDocValues = new ArrayList<>();
+                indexValues = index.get(wordInPhrase);
+                List<Integer> wordLocInDoc = indexValues.get(docID);
+                //commonDocValues.add(wordLocInDoc);
+                docList.add(wordLocInDoc);
             }
+            wordLoc.put(docID, docList);
         }
         return wordLoc;
     }
 
- 
+    private List<Integer> findIntersectingLists(String[] searchPhrase, Map<Integer, List<List<Integer>>> locIdx) {
+        List<Integer> result = new ArrayList<>();
+        Map<Integer, Integer> listInter = new HashMap<>();
+        Integer counter;
+        for (Integer docID : locIdx.keySet()) {
+            List<List<Integer>> locIdxValues = locIdx.get(docID);
+            counter = 0;
+            for (int i = 0; i < locIdxValues.size(); i++) {
+                List<Integer> oneList = locIdxValues.get(i);
+                for (int j = 0; j < oneList.size(); j++) {
+                    listInter.put(oneList.get(j), ++counter);
+                }
+            }
+            for (Integer num : listInter.keySet()) {
+                if (listInter.get(num) == searchPhrase.length) {
+                    result.add(docID);
+                }
+            }
+        }
+        return result;
+    }
 }
