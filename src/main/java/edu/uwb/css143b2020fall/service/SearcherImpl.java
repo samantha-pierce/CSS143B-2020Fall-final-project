@@ -48,7 +48,7 @@ public class SearcherImpl implements Searcher {
             }
             getSearchPhrase.put(wordList[eaWord], oneDocList);
         }
-        // get the largest list
+        // gets the largest list
         List<Set<Integer>> searchPhraseValues = new ArrayList<>();
         for (String key : getSearchPhrase.keySet()) {
             searchPhraseValues.add(getSearchPhrase.get(key));
@@ -73,16 +73,13 @@ public class SearcherImpl implements Searcher {
     private Map<Integer, List<List<Integer>>> getWordLoc(String[] searchPhrase, List<Integer> commonDocs, Map<String, List<List<Integer>>> index) {
         Map<Integer, List<List<Integer>>> wordLoc = new HashMap<>();
         List<List<Integer>> indexValues;
-        List<List<Integer>> commonDocValues = new ArrayList<>();
         List<List<Integer>> docList;
         for (int i = 0; i < commonDocs.size(); i++) {
             Integer docID = commonDocs.get(i);
             docList = new ArrayList<>();
             for (String wordInPhrase : searchPhrase) {
-                //commonDocValues = new ArrayList<>();
                 indexValues = index.get(wordInPhrase);
                 List<Integer> wordLocInDoc = indexValues.get(docID);
-                //commonDocValues.add(wordLocInDoc);
                 docList.add(wordLocInDoc);
             }
             wordLoc.put(docID, docList);
